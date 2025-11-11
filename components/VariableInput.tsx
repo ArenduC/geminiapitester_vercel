@@ -120,7 +120,10 @@ const VariableInput: React.FC<VariableInputProps> = ({ as = 'input', activeEnvir
     });
   };
 
-  const handleScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
+  // FIX: The event handler's parameter type is updated to `React.UIEvent<HTMLElement>`.
+  // This more generic type is compatible with both `<input>` and `<textarea>` elements,
+  // resolving the type error for the `onScroll` prop in the polymorphic `Component`.
+  const handleScroll = (e: React.UIEvent<HTMLElement>) => {
     if (highlighterRef.current) {
       highlighterRef.current.scrollTop = e.currentTarget.scrollTop;
       highlighterRef.current.scrollLeft = e.currentTarget.scrollLeft;

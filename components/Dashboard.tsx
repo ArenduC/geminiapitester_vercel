@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { supabase } from '../services/supabaseService';
 import { runApiTest } from '../services/apiRunnerService';
 import type { User, Project, ApiFolder, ApiTest, ApiResponse, Environment, AuthDetails } from '../types';
@@ -9,11 +9,13 @@ import DataError from './DataError';
 import Modal from './Modal';
 import ManageEnvironmentsModal from './ManageEnvironmentsModal';
 import ConfirmationModal from './ConfirmationModal';
-import CompareView from './CompareView';
 import TokenDecoderView from './TokenDecoderView';
 import { parsePostmanCollection } from '../services/postmanImportService';
 import { exportCollection, ExportFormat } from '../services/exportService';
 import { JSONPath } from 'jsonpath-plus';
+import Spinner from './Spinner';
+
+const CompareView = React.lazy(() => import('./CompareView'));
 
 interface DashboardProps {
   user: User;
@@ -734,10 +736,12 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
               />
             )}
             {activeView === 'comparer' && (
-              <CompareView
-                tests={tests}
-                onRunTest={handleRunTest}
-              />
+              <Suspense fallback={<div className="flex-1 flex items-center justify-center bg-gray-900"><Spinner size="lg" /></div>}>
+                <CompareView
+                  tests={tests}
+                  onRunTest={handleRunTest}
+                />
+              </Suspense>
             )}
             {activeView === 'decoder' && (
               <TokenDecoderView />

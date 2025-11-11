@@ -89,7 +89,9 @@ const ManageEnvironmentsModal: React.FC<ManageEnvironmentsModalProps> = ({
   if (!isOpen) return null;
 
   const handleVariableChange = (index: number, field: 'key' | 'value', text: string) => {
-    const newVariables = variables.map((variable, i) => {
+    // FIX: Add a return type annotation `[string, string]` to the map function.
+    // This prevents TypeScript from widening the tuple to a string array, resolving the type error.
+    const newVariables = variables.map((variable, i): [string, string] => {
       if (i !== index) return variable;
       return field === 'key' ? [text, variable[1]] : [variable[0], text];
     });

@@ -99,7 +99,9 @@ const TestView: React.FC<TestViewProps> = ({
   
   // -- Query Params Handlers --
   const handleParamChange = (index: number, field: 'key' | 'value', newValue: string) => {
-    const newParams = queryParams.map((param, i) => {
+    // FIX: Add a return type annotation `[string, string]` to the map function.
+    // This ensures TypeScript doesn't widen the tuple to a string array, resolving the type error.
+    const newParams = queryParams.map((param, i): [string, string] => {
         if (i !== index) return param;
         return field === 'key' ? [newValue, param[1]] : [param[0], newValue];
     });
@@ -107,12 +109,17 @@ const TestView: React.FC<TestViewProps> = ({
     updateUrlWithParams(newParams);
   };
   const addParam = () => {
-    const newParams = [...queryParams, ['', '']];
+    // FIX: Explicitly cast `['', '']` to a `[string, string]` tuple to prevent a type mismatch error.
+    const newParams = [...queryParams, ['', ''] as [string, string]];
     setQueryParams(newParams);
   };
   const removeParam = (index: number) => {
-    const newParams = queryParams.filter((_, i) => i !== index);
-    setQueryParams(newParams.length > 0 ? newParams : [['', '']]); // Ensure at least one empty row
+    const filteredParams = queryParams.filter((_, i) => i !== index);
+    // FIX: Create a new variable `newParams` to hold the final state.
+    // This fixes a logic bug where `updateUrlWithParams` received a different value than `setQueryParams`.
+    // It also helps TypeScript correctly infer the type `[string, string][]`.
+    const newParams = filteredParams.length > 0 ? filteredParams : ([['', '']] as [string, string][]);
+    setQueryParams(newParams);
     updateUrlWithParams(newParams);
   };
   // Sync params editor when URL is typed into manually
