@@ -7,6 +7,7 @@ import SettingsModal from './SettingsModal';
 import EnvironmentSelector from './EnvironmentSelector';
 import { TrashIcon } from './icons/TrashIcon';
 import { VariableIcon } from './icons/VariableIcon';
+import { RefreshIcon } from './icons/RefreshIcon';
 
 interface ProjectSelectorProps {
   projects: Project[];
@@ -23,6 +24,8 @@ interface ProjectSelectorProps {
   activeEnvironment: Environment | null;
   onSelectEnvironment: (environment: Environment | null) => void;
   onManageEnvironments: () => void;
+  onRefresh: () => void;
+  isRefreshing: boolean;
 }
 
 const ProjectSelector: React.FC<ProjectSelectorProps> = ({
@@ -40,6 +43,8 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
   activeEnvironment,
   onSelectEnvironment,
   onManageEnvironments,
+  onRefresh,
+  isRefreshing,
 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
@@ -114,6 +119,9 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
             </button>
           )}
           <span className="text-sm text-gray-400">{user.name}</span>
+          <button onClick={onRefresh} className="text-gray-400 hover:text-white" disabled={isRefreshing} title="Refresh Data">
+            <RefreshIcon className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </button>
           <button onClick={() => setSettingsModalOpen(true)} className="text-gray-400 hover:text-white">
             <CogIcon className="w-5 h-5" />
           </button>
