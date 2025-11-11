@@ -36,6 +36,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   const [loadingFolders, setLoadingFolders] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [testLoading, setTestLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
   const [dbError, setDbError] = useState<{title: string, message: string} | null>(null);
@@ -676,6 +677,47 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     setIsConfirmModalOpen(true);
   };
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    setDbError(null);
+
+    const [userResult, projectsResult] = await Promise.all([
+      supabase.auth.getSession(),
+      supabase.rpc('get_user_projects')
+    ]);
+
+    if (userResult.data.session?.user) {
+        const user = userResult.data.session.user;
+        setAppUser({
+            id: user.id,
+            email: user.email || '',
+            name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+        });
+    }
+
+    if (projectsResult.error) {
+      setDbError({ title: "Failed to refresh projects", message: projectsResult.error.message });
+      setIsRefreshing(false);
+      return;
+    }
+    
+    const newProjects = (projectsResult.data as Project[]) || [];
+    setProjects(newProjects);
+
+    if (selectedProject) {
+        const stillExists = newProjects.find(p => p.id === selectedProject.id);
+        if (stillExists) {
+            setSelectedProject(stillExists); 
+        } else {
+            handleSelectProject(newProjects[0] || null);
+        }
+    } else if (newProjects.length > 0) {
+        handleSelectProject(newProjects[0]);
+    }
+
+    setIsRefreshing(false);
+  };
+
 
   return (
     <div className="h-screen w-screen bg-gray-950 text-white flex flex-col font-sans">
@@ -694,6 +736,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         activeEnvironment={activeEnvironment}
         onSelectEnvironment={handleSelectEnvironment}
         onManageEnvironments={() => setIsEnvModalOpen(true)}
+        onRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
       />
       <div className="flex-1 flex min-h-0">
         {dbError ? (
