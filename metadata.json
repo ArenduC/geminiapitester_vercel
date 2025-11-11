@@ -1,0 +1,5 @@
+{
+  "name": "Gemini API Tester",
+  "description": "An API testing application that leverages Supabase for project and test management, with real-time collaboration and AI-powered test case generation using the Gemini API.",
+  "requestFramePermissions": []
+}
